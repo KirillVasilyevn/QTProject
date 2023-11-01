@@ -2,17 +2,18 @@ import logging
 import sqlite3
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
 from app.settings.DBSettings import DATABASE_DIR
 from app.settings.UISettings import UI_SRC_DIR
-from app.UI.windows.ExpensesWindow import ExpensesWindow
-from app.UI.windows.GraphicsWindow import GraphicsWindow
+from app.UI.ExpensesWindow import ExpensesWindow
+from app.UI.GraphicsWindow import GraphicsWindow
 
 
 class DatabaseWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.input_database = None
         logging.info(f"Path to UI srcs: {UI_SRC_DIR}")
         uic.loadUi(UI_SRC_DIR + 'untitled.ui', self)
         self.expenses_window = ExpensesWindow()
@@ -50,6 +51,11 @@ class DatabaseWindow(QMainWindow):
         self.all_spents_btn.clicked.connect(self.all_spents_btn_fun)
         self.all_graph_btn.clicked.connect(self.all_graph_btn_fun)
         self.download_btn_.clicked.connect(self.download_btn__fun)
+        self.download_btn.clicked.connect(self.download_btn_fun)
+
+    def download_btn_fun(self) -> None:
+        self.input_database = QFileDialog.getOpenFileName(self, 'Выбрать картинку', '')[0]
+        print(self.input_database)
 
     def last_spends_fun(self) -> None:
         con = sqlite3.connect(DATABASE_DIR + 'Expenses_database.sqlite')
@@ -59,7 +65,6 @@ class DatabaseWindow(QMainWindow):
         result = sorted(result, key=lambda x: x[2])
         result = sorted(result, key=lambda x: x[3])
         result = sorted(result, key=lambda x: x[4])
-        print(result)
 
         if len(result) >= 1:
             self.spnt_lbl_1.setText(str(result[0][0]) + "\t" + str(result[0][1]) + "\t" + str(result[0][2]) + "." +
@@ -129,7 +134,7 @@ class DatabaseWindow(QMainWindow):
                 query = f"""
                     INSERT INTO expnstable
                     (sum_of_pay, describe, date_day, date_mon, date_year)
-                    VALUES
+                     VALUES
                     ({int(self.sum_line.text())}, {self.dscribe_line.text()}, {date_day}, {date_mon}, {date_year})
                 """
 
